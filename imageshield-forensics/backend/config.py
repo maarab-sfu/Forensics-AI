@@ -42,7 +42,9 @@ elif WM_MODEL == 'RedMark' and ECCMethod == None:
 USE_HUMAN_MASKS = 2 # 0 means only automatic mask, 1 means only human mask and 2 means mixed.
 
 
-IMAGE_PATH = 'C:/Users/maarab/Forensics/SHIELD/image/'
+
+
+IMAGE_PATH = './results/'
 
 # RESTORE_PATH = 'C:/Users/maarab/Forensics/SHIELD/image/'
 
@@ -183,7 +185,7 @@ progress_bar = False
 
 # Saving checkpoints:
 
-MODEL_PATH = 'C:/Users/maarab/Forensics/SHIELD/model/'
+MODEL_PATH = './model/'
 checkpoint_on_error = False
 SAVE_freq = 10
 
@@ -307,10 +309,6 @@ if continue_train>0:
     trained_epoch = 299
 else:
     trained_epoch = 0
-
-
-
-
 
 
 

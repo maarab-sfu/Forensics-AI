@@ -62,7 +62,10 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def load(net, optim, name):
-    state_dicts = torch.load(name)
+    if torch.cuda.is_available():
+        state_dicts = torch.load(name)
+    else:
+        state_dicts = torch.load(name, map_location=torch.device('cpu'))
     network_state_dict = {k:v for k,v in state_dicts['net'].items() if 'tmp_var' not in k}
     net.load_state_dict(network_state_dict)
     try:
@@ -167,7 +170,10 @@ def main():
     # Watermarking Model
     if c.WM_MODEL == 'InvisMark':
         ckpt_path = './model/paper.ckpt'
-        state_dict = torch.load(ckpt_path)
+        if torch.cuda.is_available():
+            state_dicts = torch.load(ckpt_path)
+        else:
+            state_dicts = torch.load(ckpt_path, map_location=torch.device('cpu'))
         cfg = state_dict['config']
         wm_model = train_watermark.Watermark(cfg)
         wm_model.load_model(ckpt_path)

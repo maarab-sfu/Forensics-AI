@@ -30,6 +30,7 @@ from torchmetrics.functional import peak_signal_noise_ratio
 from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Model(nn.Module):
     def __init__(self):
@@ -52,7 +53,7 @@ def init_model(mod):
     for key, param in mod.named_parameters():
         split = key.split('.')
         if param.requires_grad:
-            param.data = c.init_scale * torch.randn(param.data.shape).cuda()
+            param.data = c.init_scale * torch.randn(param.data.shape, device=param.device)
             if split[-2] == 'conv5':
                 param.data.fill_(0.)
 

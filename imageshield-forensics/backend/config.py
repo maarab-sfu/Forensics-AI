@@ -12,7 +12,7 @@ Counter2 = 14000
 
 
 
-WM_MODEL = "TrustMark" # InvisMark or TrustMark or RedMark
+WM_MODEL = "InvisMark" # InvisMark or TrustMark or RedMark
 HashEmbedding = False
 ECCMethod = 'None'  # None or 'BCH' or 'RS' or 'polar'
 

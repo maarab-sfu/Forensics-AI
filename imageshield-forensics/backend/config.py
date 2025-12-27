@@ -13,7 +13,7 @@ Counter2 = 14000
 
 
 WM_MODEL = "RedMark" # InvisMark or TrustMark or RedMark
-HashEmbedding = True
+HashEmbedding = False
 ECCMethod = 'None'  # None or 'BCH' or 'RS' or 'polar'
 
 hash_length = 8 #^2. The hash length is power of two of hash_length.

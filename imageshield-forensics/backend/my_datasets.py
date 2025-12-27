@@ -787,54 +787,54 @@ transform_edit = T.Compose([
 
 
 # Training data loader
-trainloader = DataLoader(
-    Hinet_Dataset(transforms_=transform, mode="train"),
-    batch_size=c.batch_size,
-    shuffle=True,
-    pin_memory=True,
-    num_workers=1,
-    drop_last=True
-)
-# Test data loader
-distortloader = DataLoader(
-    Hinet_Dataset(transforms_=transform_val, mode="makenoise"),
-    batch_size=c.batchsize_val,
-    shuffle=False,
-    pin_memory=True,
-    num_workers=1,
-)
+# trainloader = DataLoader(
+#     Hinet_Dataset(transforms_=transform, mode="train"),
+#     batch_size=c.batch_size,
+#     shuffle=True,
+#     pin_memory=True,
+#     num_workers=1,
+#     drop_last=True
+# )
+# # Test data loader
+# distortloader = DataLoader(
+#     Hinet_Dataset(transforms_=transform_val, mode="makenoise"),
+#     batch_size=c.batchsize_val,
+#     shuffle=False,
+#     pin_memory=True,
+#     num_workers=1,
+# )
 
-restoreloader = DataLoader(
-    Hinet_Dataset(transforms_=transform_val, mode="restore"),
-    batch_size=c.batchsize_val,
-    shuffle=False,
-    pin_memory=True,
-    num_workers=1,
-)
+# restoreloader = DataLoader(
+#     Hinet_Dataset(transforms_=transform_val, mode="restore"),
+#     batch_size=c.batchsize_val,
+#     shuffle=False,
+#     pin_memory=True,
+#     num_workers=1,
+# )
 
-restorecodeloader = DataLoader(
-    Hinet_Dataset(transforms_=transform_val, mode="restorecode"),
-    batch_size=c.batchsize_val,
-    shuffle=False,
-    pin_memory=True,
-    num_workers=1,
-)
+# restorecodeloader = DataLoader(
+#     Hinet_Dataset(transforms_=transform_val, mode="restorecode"),
+#     batch_size=c.batchsize_val,
+#     shuffle=False,
+#     pin_memory=True,
+#     num_workers=1,
+# )
 
-hashloader = DataLoader(
-    Hinet_Dataset(transforms_=transform_hash, mode="hash"),
-    batch_size=c.batchsize_val,
-    shuffle=False,
-    pin_memory=True,
-    num_workers=1,
-)
+# hashloader = DataLoader(
+#     Hinet_Dataset(transforms_=transform_hash, mode="hash"),
+#     batch_size=c.batchsize_val,
+#     shuffle=False,
+#     pin_memory=True,
+#     num_workers=1,
+# )
 
-localizeloader = DataLoader(
-    Hinet_Dataset(transforms_=transform_val, mode="localize"),
-    batch_size=c.batchsize_val,
-    shuffle=False,
-    pin_memory=True,
-    num_workers=1,
-)
+# localizeloader = DataLoader(
+#     Hinet_Dataset(transforms_=transform_val, mode="localize"),
+#     batch_size=c.batchsize_val,
+#     shuffle=False,
+#     pin_memory=True,
+#     num_workers=1,
+# )
 
 testloader = DataLoader(
     Hinet_Dataset(transforms_=transform_val, mode="val"),
@@ -845,38 +845,38 @@ testloader = DataLoader(
     drop_last=True
 )
 
-testloader_ex = DataLoader(
-    Hinet_Dataset(transforms_=transform_val, mode="extract"),
-    batch_size=c.batchsize_val,
-    shuffle=False,
-    pin_memory=True,
-    num_workers=1,
-    drop_last=True
-)
+# testloader_ex = DataLoader(
+#     Hinet_Dataset(transforms_=transform_val, mode="extract"),
+#     batch_size=c.batchsize_val,
+#     shuffle=False,
+#     pin_memory=True,
+#     num_workers=1,
+#     drop_last=True
+# )
 
-testloader_ed = DataLoader(
-    Hinet_Dataset(transforms_=transform_val, mode="edit"),
-    batch_size=c.batchsize_val,
-    shuffle=False,
-    pin_memory=True,
-    num_workers=1,
-    drop_last=True
-)
+# testloader_ed = DataLoader(
+#     Hinet_Dataset(transforms_=transform_val, mode="edit"),
+#     batch_size=c.batchsize_val,
+#     shuffle=False,
+#     pin_memory=True,
+#     num_workers=1,
+#     drop_last=True
+# )
 
-tileloader_rev = DataLoader(
-        Hinet_Dataset(transforms_=transform_val, mode="tile-rev"),
-        batch_size = 1,
-        shuffle = False,
-        pin_memory = True,
-        num_workers = 1,
-        drop_last = True
-    )
+# tileloader_rev = DataLoader(
+#         Hinet_Dataset(transforms_=transform_val, mode="tile-rev"),
+#         batch_size = 1,
+#         shuffle = False,
+#         pin_memory = True,
+#         num_workers = 1,
+#         drop_last = True
+#     )
 
-tileloader = DataLoader(
-        Hinet_Dataset(transforms_=transform_val, mode="tile"),
-        batch_size = 1,
-        shuffle = False,
-        pin_memory = True,
-        num_workers = 1,
-        drop_last = True
-    )
+# tileloader = DataLoader(
+#         Hinet_Dataset(transforms_=transform_val, mode="tile"),
+#         batch_size = 1,
+#         shuffle = False,
+#         pin_memory = True,
+#         num_workers = 1,
+#         drop_last = True
+#     )

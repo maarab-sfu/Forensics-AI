@@ -40,7 +40,7 @@ elif c.WM_MODEL == "RedMark":
 import utils
 
 
-from polarecc import initialize_polar, embed_polar, extract_polar
+# from polarecc import initialize_polar, embed_polar, extract_polar
 
 
 import torchvision.utils as vutils

@@ -80,7 +80,7 @@ def gauss_noise(shape):
 
     noise = torch.zeros(shape).to(device)
     for i in range(noise.shape[0]):
-        noise[i] = torch.randn(noise[i].shape).cuda()
+        noise[i] = torch.randn(noise[i].shape).to(device)
 
     return noise
 
@@ -155,8 +155,7 @@ def main():
     loss_fn_alex = lpips.LPIPS(net='alex')
 
     # Thumbnail Embedding Model
-    net = Model()
-    net.cuda()
+    net = Model().to(device)
     init_model(net)
     net = torch.nn.DataParallel(net, device_ids=c.device_ids)
     params_trainable_net = list(filter(lambda p: p.requires_grad, net.parameters()))

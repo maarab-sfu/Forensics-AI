@@ -394,9 +394,9 @@ def main():
                 # Calculate metrics
                 lpips_temp = loss_fn_alex(cover.to("cpu"), steg.to("cpu"))
                 lpips_arr_cs.append(lpips_temp)
-
-                lpips_temp2 = loss_fn_alex(cover.to("cpu"), embedded_tensor.to("cpu"))
-                lpips_arr_ce.append(lpips_temp2)
+                if c.HashEmbedding:
+                    lpips_temp2 = loss_fn_alex(cover.to("cpu"), embedded_tensor.to("cpu"))
+                    lpips_arr_ce.append(lpips_temp2)
                 # print(lpips_arr_ce)
 
                 cover_np = cover.cpu().numpy().squeeze() * 255
@@ -437,8 +437,9 @@ def main():
             coverstegPSNR = np.mean(psnr_cs)
             coverembeddedPSNR = np.mean(psnr_ce)
             # covSSIM = np.mean(ssim_arr)
-            stacked_tensors = torch.stack(lpips_arr_ce)
-            lpips_ave_ce = torch.mean(stacked_tensors, dim=0)
+            if c.HashEmbedding:
+                stacked_tensors = torch.stack(lpips_arr_ce)
+                lpips_ave_ce = torch.mean(stacked_tensors, dim=0)
 
             stacked_tensors = torch.stack(lpips_arr_cs)
             lpips_ave_cs = torch.mean(stacked_tensors, dim=0)
@@ -449,7 +450,8 @@ def main():
             print("Total PSNR for cover and embedded: ", coverembeddedPSNR)
             
             print("LPIPS for cover and steg: ", lpips_ave_cs)
-            print("LPIPS for cover and embedded: ", lpips_ave_ce)
+            if c.HashEmbedding:
+                print("LPIPS for cover and embedded: ", lpips_ave_ce)
 
 if __name__ == '__main__':
     main()

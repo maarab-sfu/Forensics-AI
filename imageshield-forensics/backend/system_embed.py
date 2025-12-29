@@ -451,7 +451,8 @@ def main():
             
 
             print("Total PSNR for cover and steg: ", coverstegPSNR)
-            print("Total PSNR for cover and embedded: ", coverembeddedPSNR)
+            if c.HashEmbedding:
+                print("Total PSNR for cover and embedded: ", coverembeddedPSNR)
             
             print("LPIPS for cover and steg: ", lpips_ave_cs)
             if c.HashEmbedding:

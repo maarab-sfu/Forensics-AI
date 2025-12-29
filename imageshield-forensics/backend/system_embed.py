@@ -377,10 +377,12 @@ def main():
 
                 if c.save_img:
                     torchvision.utils.save_image(cover, c.IMAGE_PATH_cover + '%.5d.png' %(i+c.Counter))
-                    # torchvision.utils.save_image(steg, c.IMAGE_PATH_steg + '%.5d.png' %(i+c.Counter))
+                    if not c.HashEmbedding:
+                        torchvision.utils.save_image(steg, c.IMAGE_PATH_steg + '%.5d.png' %(i+c.Counter))
                     pil_steg.save(c.IMAGE_PATH_steg + '%.5d.png' %(i+c.Counter))
                     # torchvision.utils.save_image(embedded, c.IMAGE_PATH_double_WM + '%.5d.png' %(i+c.Counter))
-                    embedded.save(c.IMAGE_PATH_double_WM + '%.5d.png' %(i+c.Counter))
+                    if c.HashEmbedding:
+                        embedded.save(c.IMAGE_PATH_double_WM + '%.5d.png' %(i+c.Counter))
                     torchvision.utils.save_image(secret, c.IMAGE_PATH_secret + '%.5d.png' %(i+c.Counter))
 
                     sec_rgb = DeBlocking(secret)

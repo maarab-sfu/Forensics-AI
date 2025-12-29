@@ -433,7 +433,8 @@ def main():
 
                 # print("Cover SSIM: ", ssim_temp)
                 # print("Secret SSIM: ", ssim_temp_s)
-                print(f"Index: {i:05d}, LPIPS cover vs. embedded: {lpips_temp2}, PSNR cover vs. embedded: {psnr_temp2}")
+                if c.HashEmbedding:
+                    print(f"Index: {i:05d}, LPIPS cover vs. embedded: {lpips_temp2}, PSNR cover vs. embedded: {psnr_temp2}")
 
 
             coverstegPSNR = np.mean(psnr_cs)

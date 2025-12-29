@@ -7,7 +7,7 @@ epochs = 30000
 weight_decay = 1e-5
 init_scale = 0.01
 save_img = True
-Counter = 13000
+Counter = 0
 Counter2 = 14000
 
 

@@ -365,14 +365,14 @@ def main():
                     # watermark = embedded_tensor[0]
 
                     
-                
-                watermark_numpy = watermark.cpu().numpy().reshape(1,-1)  # Convert to numpy array
-                # print(watermark_numpy.shape)
-                np.savetxt(f, watermark_numpy, fmt='%d', header=f"Watermark for image {i:05d}", comments='')  # Append with a header
+                if c.HashEmbedding:
+                    watermark_numpy = watermark.cpu().numpy().reshape(1,-1)  # Convert to numpy array
+                    # print(watermark_numpy.shape)
+                    np.savetxt(f, watermark_numpy, fmt='%d', header=f"Watermark for image {i:05d}", comments='')  # Append with a header
 
                 
-                hash_numpy = np.expand_dims(np.asarray(hash_value_bin), 0)
-                np.savetxt(f2, hash_numpy, fmt='%d', header=f"Hash for image {i:05d}", comments='')  # Append with a header
+                    hash_numpy = np.expand_dims(np.asarray(hash_value_bin), 0)
+                    np.savetxt(f2, hash_numpy, fmt='%d', header=f"Hash for image {i:05d}", comments='')  # Append with a header
 
 
                 if c.save_img:

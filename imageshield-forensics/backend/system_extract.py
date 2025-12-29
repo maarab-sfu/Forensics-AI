@@ -416,7 +416,10 @@ def main():
                 steg = Variable(transform_val(Image.open(steg_path).convert("RGB"))).to(device).unsqueeze(0)
                 # converted = Variable(transform_val(Image.open(converted_path).convert("RGB"))).to(device).unsqueeze(0)
                 # sec_converted = Variable(transform_val(Image.open(sec_converted_path).convert("RGB"))).to(device).unsqueeze(0)
-                doubleWM = Variable(transform_val(Image.open(doubleWM_path).convert("RGB"))).to(device).unsqueeze(0)
+                if c.HashEmbedding:
+                    doubleWM = Variable(transform_val(Image.open(doubleWM_path).convert("RGB"))).to(device).unsqueeze(0)
+                else:
+                    doubleWM = steg
 
                 cover = cover.to(device)
                 secret = secret.to(device)
@@ -457,65 +460,66 @@ def main():
 
                 mask = F.interpolate(mask, size=(256, 256), mode="bilinear", align_corners=False)
 
-                """ Extracting the watermark """
-                if c.WM_MODEL == 'InvisMark':
-                    extracted_watermark = wm_model._decode(noised)
-
-                    extracted_watermark_bits = (extracted_watermark >= 0.5).int()
-                    extracted_watermark_bits_numpy = extracted_watermark_bits.cpu().numpy()
-
-                    # print(extracted_watermark, type(extracted_watermark))
-                    # print(extracted_watermark_bits, type(extracted_watermark_bits))
-                    # print(extracted_watermark_bits_numpy, type(extracted_watermark_bits_numpy))
-                elif c.WM_MODEL == 'TrustMark':
-                    pil_noised = to_pil_image(noised[0])
-                    # pil_noised = to_pil_image(doubleWM[0])
-                    if c.ECCMethod == None:
-                        watermark_extracted, extracted_hash_bits, Hash_detected, wm_schema = tm.decode(pil_noised, MODE='binary')
-                        extracted_hash_bits_numpy = np.array(list(extracted_hash_bits), dtype=int).reshape(1, -1)
-                        extracted_hash_tensor = torch.from_numpy(extracted_hash_bits_numpy).to(device)
-
-                        extracted_watermark = ''.join(str(int(x)) for x in watermark_extracted[0])
-                        extracted_watermark_bits_numpy = np.array(list(extracted_watermark), dtype=int).reshape(1, -1)
-                        extracted_watermark_bits = torch.from_numpy(extracted_watermark_bits_numpy)
-                        extracted_watermark = extracted_watermark_bits.to(device)
-                    else:
-                        extracted_watermark, wm_present, wm_schema = tm.decode(pil_noised, MODE='binary')
-                        extracted_watermark_bits_numpy = np.array(list(extracted_watermark), dtype=int).reshape(1, -1)
-                        extracted_watermark_bits = torch.from_numpy(extracted_watermark_bits_numpy)
-                        extracted_watermark = extracted_watermark_bits.to(device)
-                
-                elif c.WM_MODEL == 'RedMark':
-                    noised_np = noised.cpu().squeeze(0).permute(1, 2, 0).numpy()
-                    noised_np = (noised_np - noised_np.min()) / (noised_np.max() - noised_np.min()) * 255.0
-
-                    # Convert to uint8 for image format
-                    noised_np = np.uint8(noised_np)
-
-                    extracted_watermark = extract_watermark(extractor_net, noised_np)
-                    
-                    # Convert the array to integers
-                    arr_int = extracted_watermark.astype(int)
-
-                    # Flatten the array to 1D
-                    arr_flat = arr_int.flatten()
-
-                    # Convert the array to a string
-                    extracted_watermark_bits_string = ''.join(arr_flat.astype(str))
-                    # extracted_hash_bits = ''.join(extracted_watermark.astype(int).astype(str))
-                    # print(extracted_watermark)
-                    extracted_watermark_bits_numpy = np.array(list(extracted_watermark), dtype=int).reshape(1, -1)
-                    extracted_watermark_bits = torch.from_numpy(extracted_watermark_bits_numpy)
-                    extracted_watermark = extracted_watermark_bits.to(device)
-
-                    # ecc.print_comparison(ecc.tensor_to_string(hash_value[0])[:c.HASH_SIZE], extracted_hash_bits[:c.HASH_SIZE])
-
-                
-                if c.ECCMethod != None:
-                    # print("Saving Watermark...")
-                    # print(extracted_watermark_bits_numpy)
-                    np.savetxt(f, extracted_watermark_bits_numpy, fmt='%d', header=f"Watermark for image {num_batches:05d}", comments='')  # Append with a header
                 if c.HashEmbedding:
+                    """ Extracting the watermark """
+                    if c.WM_MODEL == 'InvisMark':
+                        extracted_watermark = wm_model._decode(noised)
+
+                        extracted_watermark_bits = (extracted_watermark >= 0.5).int()
+                        extracted_watermark_bits_numpy = extracted_watermark_bits.cpu().numpy()
+
+                        # print(extracted_watermark, type(extracted_watermark))
+                        # print(extracted_watermark_bits, type(extracted_watermark_bits))
+                        # print(extracted_watermark_bits_numpy, type(extracted_watermark_bits_numpy))
+                    elif c.WM_MODEL == 'TrustMark':
+                        pil_noised = to_pil_image(noised[0])
+                        # pil_noised = to_pil_image(doubleWM[0])
+                        if c.ECCMethod == None:
+                            watermark_extracted, extracted_hash_bits, Hash_detected, wm_schema = tm.decode(pil_noised, MODE='binary')
+                            extracted_hash_bits_numpy = np.array(list(extracted_hash_bits), dtype=int).reshape(1, -1)
+                            extracted_hash_tensor = torch.from_numpy(extracted_hash_bits_numpy).to(device)
+
+                            extracted_watermark = ''.join(str(int(x)) for x in watermark_extracted[0])
+                            extracted_watermark_bits_numpy = np.array(list(extracted_watermark), dtype=int).reshape(1, -1)
+                            extracted_watermark_bits = torch.from_numpy(extracted_watermark_bits_numpy)
+                            extracted_watermark = extracted_watermark_bits.to(device)
+                        else:
+                            extracted_watermark, wm_present, wm_schema = tm.decode(pil_noised, MODE='binary')
+                            extracted_watermark_bits_numpy = np.array(list(extracted_watermark), dtype=int).reshape(1, -1)
+                            extracted_watermark_bits = torch.from_numpy(extracted_watermark_bits_numpy)
+                            extracted_watermark = extracted_watermark_bits.to(device)
+                    
+                    elif c.WM_MODEL == 'RedMark':
+                        noised_np = noised.cpu().squeeze(0).permute(1, 2, 0).numpy()
+                        noised_np = (noised_np - noised_np.min()) / (noised_np.max() - noised_np.min()) * 255.0
+
+                        # Convert to uint8 for image format
+                        noised_np = np.uint8(noised_np)
+
+                        extracted_watermark = extract_watermark(extractor_net, noised_np)
+                        
+                        # Convert the array to integers
+                        arr_int = extracted_watermark.astype(int)
+
+                        # Flatten the array to 1D
+                        arr_flat = arr_int.flatten()
+
+                        # Convert the array to a string
+                        extracted_watermark_bits_string = ''.join(arr_flat.astype(str))
+                        # extracted_hash_bits = ''.join(extracted_watermark.astype(int).astype(str))
+                        # print(extracted_watermark)
+                        extracted_watermark_bits_numpy = np.array(list(extracted_watermark), dtype=int).reshape(1, -1)
+                        extracted_watermark_bits = torch.from_numpy(extracted_watermark_bits_numpy)
+                        extracted_watermark = extracted_watermark_bits.to(device)
+
+                        # ecc.print_comparison(ecc.tensor_to_string(hash_value[0])[:c.HASH_SIZE], extracted_hash_bits[:c.HASH_SIZE])
+
+                    
+                    if c.ECCMethod != None:
+                        # print("Saving Watermark...")
+                        # print(extracted_watermark_bits_numpy)
+                        np.savetxt(f, extracted_watermark_bits_numpy, fmt='%d', header=f"Watermark for image {num_batches:05d}", comments='')  # Append with a header
+
                     ''' Calculating Hash '''
                     pil_noised = to_pil_image(noised[0])
                     hash_noised = imagehash.phash(pil_noised, hash_size = c.hash_length)
@@ -732,21 +736,24 @@ def main():
 
                 psnr_temp2 = computePSNR(restored_np, cover_np)
                 psnr_rc.append(psnr_temp2)
+                if c.HashEmbedding:
+                    if c.WM_MODEL == 'RedMark':
+                        # equal_elements = (W == w_extracted)
+                        # print(extracted_hash_bits.shape)
+                        # print(hash_value.shape)
+                        bitAcc = metrics.bit_accuracy(extracted_hash_bits.reshape(1,-1), hash_value)
+                        noised_bitAcc = metrics.bit_accuracy(noised_hash_bits.reshape(1,-1), hash_value)
+                    else:
+                        bitAcc = metrics.bit_accuracy(extracted_watermark[:96], watermark[:96])
+                    if bitAcc < c.MIN_ACC/100:
+                        low_acc_count += 1
+                    bit_acc_list.append(bitAcc.item())
+                    noised_bit_acc_list.append(noised_bitAcc.item())
 
-                if c.WM_MODEL == 'RedMark':
-                    # equal_elements = (W == w_extracted)
-                    # print(extracted_hash_bits.shape)
-                    # print(hash_value.shape)
-                    bitAcc = metrics.bit_accuracy(extracted_hash_bits.reshape(1,-1), hash_value)
-                    noised_bitAcc = metrics.bit_accuracy(noised_hash_bits.reshape(1,-1), hash_value)
+                    print(f"Index: {num_batches:05d}, BitAcc: {bitAcc}, noised BitAcc: {noised_bitAcc}, F1 Score: {f1}, PSNR final vs. cover: {psnr_temp1}, PSNR restored vs. cover: {psnr_temp2}\n")
                 else:
-                    bitAcc = metrics.bit_accuracy(extracted_watermark[:96], watermark[:96])
-                if bitAcc < c.MIN_ACC/100:
-                    low_acc_count += 1
-                bit_acc_list.append(bitAcc.item())
-                noised_bit_acc_list.append(noised_bitAcc.item())
+                    print(f"Index: {num_batches:05d}, F1 Score: {f1}, PSNR final vs. cover: {psnr_temp1}, PSNR restored vs. cover: {psnr_temp2}\n")
 
-                print(f"Index: {num_batches:05d}, BitAcc: {bitAcc}, noised BitAcc: {noised_bitAcc}, F1 Score: {f1}, PSNR final vs. cover: {psnr_temp1}, PSNR restored vs. cover: {psnr_temp2}\n")
                 num_batches += 1
                 if c.noises == [] and num_batches == num_edited_image_files:
                     break
@@ -762,27 +769,28 @@ def main():
         # Compute average metrics
         # Compute statistics
         # Convert list to tensor
-        noised_bit_acc_list = torch.tensor(noised_bit_acc_list)
-        bit_acc_list = torch.tensor(bit_acc_list)
+        if c.HashEmbedding:
+            noised_bit_acc_list = torch.tensor(noised_bit_acc_list)
+            bit_acc_list = torch.tensor(bit_acc_list)
 
-        average_noised_bit_acc = noised_bit_acc_list.mean()
-        average_bit_acc = bit_acc_list.mean()
-        min_bit_acc = bit_acc_list.min()
-        max_bit_acc = bit_acc_list.max()
-        std_bit_acc = bit_acc_list.std(unbiased=False)  # Use unbiased=False for population std
-        q1 = torch.quantile(bit_acc_list, 0.25)  # First quartile (Q1)
-        q3 = torch.quantile(bit_acc_list, 0.75)  # Third quartile (Q3)
+            average_noised_bit_acc = noised_bit_acc_list.mean()
+            average_bit_acc = bit_acc_list.mean()
+            min_bit_acc = bit_acc_list.min()
+            max_bit_acc = bit_acc_list.max()
+            std_bit_acc = bit_acc_list.std(unbiased=False)  # Use unbiased=False for population std
+            q1 = torch.quantile(bit_acc_list, 0.25)  # First quartile (Q1)
+            q3 = torch.quantile(bit_acc_list, 0.75)  # Third quartile (Q3)
 
-        # Print results
-        print(f"Average Bit Accuracy: {average_bit_acc.item():.4f}")
-        print(f"Average Bit Accuracy for noised image: {average_noised_bit_acc.item():.4f}")
-        print(f"Min Bit Accuracy: {min_bit_acc.item():.4f}")
-        print(f"Max Bit Accuracy: {max_bit_acc.item():.4f}")
-        print(f"Standard Deviation: {std_bit_acc.item():.4f}")
-        print(f"Q1 (First Quartile): {q1.item():.4f}")
-        print(f"Q3 (Third Quartile): {q3.item():.4f}")
-        if c.ECCMethod == None:
-            print(f"Average Detection Accuracy: {(1 - missed_watermarks/num_batches)*100:.4f}\%")
+            # Print results
+            print(f"Average Bit Accuracy: {average_bit_acc.item():.4f}")
+            print(f"Average Bit Accuracy for noised image: {average_noised_bit_acc.item():.4f}")
+            print(f"Min Bit Accuracy: {min_bit_acc.item():.4f}")
+            print(f"Max Bit Accuracy: {max_bit_acc.item():.4f}")
+            print(f"Standard Deviation: {std_bit_acc.item():.4f}")
+            print(f"Q1 (First Quartile): {q1.item():.4f}")
+            print(f"Q3 (Third Quartile): {q3.item():.4f}")
+            if c.ECCMethod == None:
+                print(f"Average Detection Accuracy: {(1 - missed_watermarks/num_batches)*100:.4f}\%")
         
 
         print("Average PSNR of the final image vs. the cover image is: ", PSNR_fc)
@@ -797,8 +805,9 @@ def main():
         print(f"Average Recall: {avg_recall:.4f}")
         print(f"Average F1 Score: {avg_f1:.4f}")
         print(f"Average IOU: {avg_iou:.4f}")
-        print(f"Number of Missed Watermarks: {missed_watermarks:2d}")
-        print(f"Number of Low Accuracy Watermarks Detectoion: {low_acc_count:2d}")
+        if c.HashEmbedding:
+            print(f"Number of Missed Watermarks: {missed_watermarks:2d}")
+            print(f"Number of Low Accuracy Watermarks Detectoion: {low_acc_count:2d}")
 
 if __name__ == '__main__':
     main()

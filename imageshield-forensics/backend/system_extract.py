@@ -15,7 +15,7 @@ from restore_train_esrgan import ImageDataset, disect_secrev, GeneratorRRDB, den
 import ecc
 import bchecc
 
-from polarecc import initialize_polar, embed_polar, extract_polar
+# from polarecc import initialize_polar, embed_polar, extract_polar
 
 from system_embed import hex_to_binary_string
 from torchvision.transforms.functional import to_pil_image

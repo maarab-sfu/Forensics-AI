@@ -405,14 +405,16 @@ def main():
                 steg_np = steg.cpu().numpy().squeeze() * 255
                 np.clip(steg_np, 0, 255)
 
-                embedded_np = embedded_tensor.cpu().numpy().squeeze() * 255
-                np.clip(embedded_np, 0, 255)
+                if c.HashEmbedding:
+                    embedded_np = embedded_tensor.cpu().numpy().squeeze() * 255
+                    np.clip(embedded_np, 0, 255)
 
                 psnr_temp = computePSNR(cover_np, steg_np)
                 psnr_cs.append(psnr_temp)
 
-                psnr_temp2 = computePSNR(cover_np, embedded_np)
-                psnr_ce.append(psnr_temp2)
+                if c.HashEmbedding:
+                    psnr_temp2 = computePSNR(cover_np, embedded_np)
+                    psnr_ce.append(psnr_temp2)
                 
                 
                 # Move tensors to CPU (if on GPU) and convert to numpy arrays
@@ -435,7 +437,8 @@ def main():
 
 
             coverstegPSNR = np.mean(psnr_cs)
-            coverembeddedPSNR = np.mean(psnr_ce)
+            if c.HashEmbedding:
+                coverembeddedPSNR = np.mean(psnr_ce)
             # covSSIM = np.mean(ssim_arr)
             if c.HashEmbedding:
                 stacked_tensors = torch.stack(lpips_arr_ce)

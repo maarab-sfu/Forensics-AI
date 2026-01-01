@@ -314,6 +314,10 @@ class Generator(nn.Module):
 
         if checkpoint is not None:
             generator_state_dict = torch.load(checkpoint)['G']
+            if torch.cuda.is_available():
+                generator_state_dict = torch.load(checkpoint)['G']
+            else:
+                generator_state_dict = torch.load(checkpoint, map_location=torch.device('cpu'))['G']
             self.load_state_dict(generator_state_dict, strict=True)
 
         self.eval()

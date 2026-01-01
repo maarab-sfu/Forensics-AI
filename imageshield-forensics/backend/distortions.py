@@ -138,12 +138,12 @@ class GaussianNoise(nn.Module):
     #     for idx in range(batch_encoded_image.shape[0]):
     #         encoded_image = batch_encoded_image[idx]
     #         noise_image = skimage.util.random_noise(encoded_image, mode= 'gaussian',clip = False, var = (self.Standard_deviation) ** 2 )
-    #         noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).cuda()
+    #         noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).to(c.device)
     #         if (idx == 0):
     #             batch_noise_image = noise_image.unsqueeze(0)
     #         else:
     #             batch_noise_image = torch.cat((batch_noise_image, noise_image.unsqueeze(0)), 0)  # batch*H*W*C
-    #     batch_noise_image = Variable(batch_noise_image, requires_grad=True).cuda()  # batch*C*H*W
+    #     batch_noise_image = Variable(batch_noise_image, requires_grad=True).to(c.device)  # batch*C*H*W
     #     noised_and_cover[0] = 2*batch_noise_image - 1
     #     return noised_and_cover
 
@@ -160,12 +160,12 @@ class SaltPepper(nn.Module):
         for idx in range(batch_encoded_image.shape[0]):
             encoded_image = batch_encoded_image[idx]
             noise_image = skimage.util.random_noise(encoded_image, mode='s&p', amount = self.Amount)
-            noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).cuda()
+            noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).to(c.device)
             if (idx == 0):
                 batch_noise_image = noise_image.unsqueeze(0)
             else:
                 batch_noise_image = torch.cat((batch_noise_image, noise_image.unsqueeze(0)), 0)  # batch*H*W*C
-        batch_noise_image = Variable(batch_noise_image, requires_grad=True).cuda()  # batch*C*H*W
+        batch_noise_image = Variable(batch_noise_image, requires_grad=True).to(c.device)  # batch*C*H*W
         noised_and_cover[0] = batch_noise_image
         return noised_and_cover
 
@@ -232,12 +232,12 @@ class AverageFilter(nn.Module):
         for idx in range(batch_encoded_image.shape[0]):
             encoded_image = batch_encoded_image[idx]
             noise_image = cv2.blur(encoded_image, (self.kernel, self.kernel))
-            noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).cuda()
+            noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).to(c.device)
             if (idx == 0):
                 batch_noise_image = noise_image.unsqueeze(0)
             else:
                 batch_noise_image = torch.cat((batch_noise_image, noise_image.unsqueeze(0)), 0)  # batch*H*W*C
-        batch_noise_image = Variable(batch_noise_image, requires_grad=True).cuda()  # batch*C*H*W
+        batch_noise_image = Variable(batch_noise_image, requires_grad=True).to(c.device)  # batch*C*H*W
         noised_and_cover[0] = (2*batch_noise_image - 1)/255
         return noised_and_cover
 
@@ -508,7 +508,7 @@ class CopyMove(nn.Module):
             start_y = random.randint(0, height)
 
             # Extract an image with the size of the original image from the tiled image
-            extracted_image = tiled_image[:,start_y:start_y + height, start_x:start_x + width].cuda()
+            extracted_image = tiled_image[:,start_y:start_y + height, start_x:start_x + width].to(c.device)
 
             # Generate a random mask with diverse shapes
             # Generate a random mask with diverse shapes
@@ -567,7 +567,7 @@ class Inpainting(nn.Module):
             start_y = random.randint(0, height)
 
             # Extract an image with the size of the original image from the tiled image
-            extracted_image = tiled_image[:,start_y:start_y + height, start_x:start_x + width].cuda()
+            extracted_image = tiled_image[:,start_y:start_y + height, start_x:start_x + width].to(c.device)
 
             # Generate a random mask with diverse shapes
             # Generate a random mask with diverse shapes
@@ -713,15 +713,15 @@ class AdjustBrightness(nn.Module):
             encoded_image = batch_encoded_image[idx]
             enhancer = ImageEnhance.Brightness(encoded_image)
             noise_image = enhancer.enhance(self.bri_factor)
-            noise_image = ToTensor()(noise_image).type(torch.FloatTensor).cuda()
-            # noise_image = (noise_image*2-1).type(torch.FloatTensor).cuda()
+            noise_image = ToTensor()(noise_image).type(torch.FloatTensor).to(c.device)
+            # noise_image = (noise_image*2-1).type(torch.FloatTensor).to(c.device)
             # noise_image = cv2.blur(encoded_image, (self.kernel, self.kernel))
-            # noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).cuda()
+            # noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).to(c.device)
             if (idx == 0):
                 batch_noise_image = noise_image.unsqueeze(0)
             else:
                 batch_noise_image = torch.cat((batch_noise_image, noise_image.unsqueeze(0)), 0)  # batch*H*W*C
-        batch_noise_image = Variable(batch_noise_image, requires_grad=True).cuda()  # batch*C*H*W
+        batch_noise_image = Variable(batch_noise_image, requires_grad=True).to(c.device)  # batch*C*H*W
         noised_and_cover[0] = (2*batch_noise_image - 1)
         return noised_and_cover
 
@@ -740,15 +740,15 @@ class AdjustContrast(nn.Module):
             encoded_image = batch_encoded_image[idx]
             enhancer = ImageEnhance.Contrast(encoded_image)
             noise_image = enhancer.enhance(self.con_factor)
-            noise_image = ToTensor()(noise_image).type(torch.FloatTensor).cuda()
-            # noise_image = (noise_image*2-1).type(torch.FloatTensor).cuda()
+            noise_image = ToTensor()(noise_image).type(torch.FloatTensor).to(c.device)
+            # noise_image = (noise_image*2-1).type(torch.FloatTensor).to(c.device)
             # noise_image = cv2.blur(encoded_image, (self.kernel, self.kernel))
-            # noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).cuda()
+            # noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).to(c.device)
             if (idx == 0):
                 batch_noise_image = noise_image.unsqueeze(0)
             else:
                 batch_noise_image = torch.cat((batch_noise_image, noise_image.unsqueeze(0)), 0)  # batch*H*W*C
-        batch_noise_image = Variable(batch_noise_image, requires_grad=True).cuda()  # batch*C*H*W
+        batch_noise_image = Variable(batch_noise_image, requires_grad=True).to(c.device)  # batch*C*H*W
         noised_and_cover[0] = (2*batch_noise_image - 1)
         return noised_and_cover
 
@@ -766,15 +766,15 @@ class AdjustColor(nn.Module):
             encoded_image = batch_encoded_image[idx]
             enhancer = ImageEnhance.Color(encoded_image)
             noise_image = enhancer.enhance(self.col_factor)
-            noise_image = ToTensor()(noise_image).type(torch.FloatTensor).cuda()
-            # noise_image = (noise_image*2-1).type(torch.FloatTensor).cuda()
+            noise_image = ToTensor()(noise_image).type(torch.FloatTensor).to(c.device)
+            # noise_image = (noise_image*2-1).type(torch.FloatTensor).to(c.device)
             # noise_image = cv2.blur(encoded_image, (self.kernel, self.kernel))
-            # noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).cuda()
+            # noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).to(c.device)
             if (idx == 0):
                 batch_noise_image = noise_image.unsqueeze(0)
             else:
                 batch_noise_image = torch.cat((batch_noise_image, noise_image.unsqueeze(0)), 0)  # batch*H*W*C
-        batch_noise_image = Variable(batch_noise_image, requires_grad=True).cuda()  # batch*C*H*W
+        batch_noise_image = Variable(batch_noise_image, requires_grad=True).to(c.device)  # batch*C*H*W
         noised_and_cover[0] = (2*batch_noise_image - 1)
         return noised_and_cover
 
@@ -792,15 +792,15 @@ class AdjustSharpness(nn.Module):
             encoded_image = batch_encoded_image[idx]
             enhancer = ImageEnhance.Sharpness(encoded_image)
             noise_image = enhancer.enhance(self.sha_factor)
-            noise_image = ToTensor()(noise_image).type(torch.FloatTensor).cuda()
-            # noise_image = (noise_image*2-1).type(torch.FloatTensor).cuda()
+            noise_image = ToTensor()(noise_image).type(torch.FloatTensor).to(c.device)
+            # noise_image = (noise_image*2-1).type(torch.FloatTensor).to(c.device)
             # noise_image = cv2.blur(encoded_image, (self.kernel, self.kernel))
-            # noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).cuda()
+            # noise_image = torch.from_numpy(noise_image.transpose((2, 0, 1))).type(torch.FloatTensor).to(c.device)
             if (idx == 0):
                 batch_noise_image = noise_image.unsqueeze(0)
             else:
                 batch_noise_image = torch.cat((batch_noise_image, noise_image.unsqueeze(0)), 0)  # batch*H*W*C
-        batch_noise_image = Variable(batch_noise_image, requires_grad=True).cuda()  # batch*C*H*W
+        batch_noise_image = Variable(batch_noise_image, requires_grad=True).to(c.device)  # batch*C*H*W
         noised_and_cover[0] = (2*batch_noise_image - 1)
         return noised_and_cover
 
@@ -1249,7 +1249,7 @@ class JpegCompression2(nn.Module):
         containers_loaded = np.transpose(containers_loaded, (0, 3, 1, 2))
 
         container_gap = containers_loaded - containers_ori
-        container_gap = torch.from_numpy(container_gap).float().cuda()
+        container_gap = torch.from_numpy(container_gap).float().to(c.device)
 
         container_img_noised_jpeg = noised_image + container_gap
 

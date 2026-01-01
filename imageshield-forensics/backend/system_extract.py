@@ -364,8 +364,9 @@ def main():
         T.ToTensor(),
     ])
     
-    rand_wat = watermarks[0].to(device)
-    rand_hash = hashs[0].to(device)
+    if c.HashEmbedding:
+        rand_wat = watermarks[0].to(device)
+        rand_hash = hashs[0].to(device)
     if c.MIXED == False and c.DISTORT == False:
         print(c.noises)
         print(c.attacks)
@@ -398,10 +399,12 @@ def main():
         missed_watermarks = 0
         low_acc_count = 0
 
-        if c.ECCMethod == 'BCH':
-            D=bchecc.DataLayer(100,False,1)
-        elif c.ECCMethod == 'polar':
-            codec = initialize_polar()
+
+        if c.HashEmbedding:
+            if c.ECCMethod == 'BCH':
+                D=bchecc.DataLayer(100,False,1)
+            elif c.ECCMethod == 'polar':
+                codec = initialize_polar()
 
         if c.noises == []:
             image_files = sorted([f for f in os.listdir(c.IMAGE_PATH_edited) if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
@@ -439,12 +442,13 @@ def main():
                 # sec_converted = sec_converted.to(device)
                 doubleWM = doubleWM.to(device)
 
-                try:
-                    watermark = watermarks[num_batches].to(device)
-                    hash_value = hashs[num_batches].to(device)
-                except:
-                    watermark = rand_wat
-                    hash_value = rand_hash
+                if c.HashEmbedding:
+                    try:
+                        watermark = watermarks[num_batches].to(device)
+                        hash_value = hashs[num_batches].to(device)
+                    except:
+                        watermark = rand_wat
+                        hash_value = rand_hash
 
 
                 """Adding distortions to doubly watermarked image """

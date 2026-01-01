@@ -313,7 +313,6 @@ class Generator(nn.Module):
         self.cnum_in = cnum_in
 
         if checkpoint is not None:
-            generator_state_dict = torch.load(checkpoint)['G']
             if torch.cuda.is_available():
                 generator_state_dict = torch.load(checkpoint)['G']
             else:

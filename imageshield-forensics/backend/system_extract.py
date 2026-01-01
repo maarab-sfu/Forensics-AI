@@ -306,11 +306,13 @@ def main():
     TD_model = TD_model.to(device)
 
     if os.path.exists("./model/best_localize_model.pth"):
-        checkpoint = torch.load("./model/best_localize_model.pth")
         if torch.cuda.is_available():
-            TD_model.load_state_dict(checkpoint['model_state_dict'])
+            checkpoint = torch.load("./model/best_localize_model.pth")
         else:
-            TD_model.load_state_dict(checkpoint['model_state_dict'], map_location=torch.device('cpu'))    
+            checkpoint = torch.load("./model/best_localize_model.pth", map_location=torch.device('cpu'))
+        
+        TD_model.load_state_dict(checkpoint['model_state_dict'])
+       
         print(f"Tampering Localization Model is loaded.")
     
     TD_model.eval()

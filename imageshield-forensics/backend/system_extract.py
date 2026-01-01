@@ -150,10 +150,10 @@ def load_with_forgery(net, fd, optim, name):
 
 
 def uniform_noise(shape):
-        noise = torch.zeros(shape).to(device)
-        for i in range(noise.shape[0]):
-            noise[i] = (torch.rand(noise[i].shape)*2-1).to(device)
-        return noise
+    noise = torch.zeros(shape).to(device)
+    for i in range(noise.shape[0]):
+        noise[i] = (torch.rand(noise[i].shape)*2-1).to(device)
+    return noise
 
 def gauss_noise(shape):
 

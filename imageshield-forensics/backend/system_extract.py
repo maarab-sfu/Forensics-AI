@@ -295,7 +295,10 @@ def main():
 
     """ Restoration Module """
     generator = GeneratorRRDB(3, filters=64, num_res_blocks=23).to(device)
-    generator.load_state_dict(torch.load('./saved_models/generator_2.pth'))
+    if torch.cuda.is_available():
+        generator.load_state_dict(torch.load('./saved_models/generator_2.pth'))
+    else:
+        generator.load_state_dict(torch.load('./saved_models/generator_2.pth', map_location=torch.device('cpu')))
     generator.eval()
 
     """ Tampering Detection Module """
@@ -304,7 +307,10 @@ def main():
 
     if os.path.exists("./model/best_localize_model.pth"):
         checkpoint = torch.load("./model/best_localize_model.pth")
-        TD_model.load_state_dict(checkpoint['model_state_dict'])
+        if torch.cuda.is_available():
+            TD_model.load_state_dict(checkpoint['model_state_dict'])
+        else:
+            TD_model.load_state_dict(checkpoint['model_state_dict'], map_location=torch.device('cpu'))    
         print(f"Tampering Localization Model is loaded.")
     
     TD_model.eval()

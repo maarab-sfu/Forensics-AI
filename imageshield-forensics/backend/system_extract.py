@@ -307,9 +307,9 @@ def main():
 
     if os.path.exists("./model/best_localize_model.pth"):
         if torch.cuda.is_available():
-            checkpoint = torch.load("./model/best_localize_model.pth")
+            checkpoint = torch.load("./model/best_localize_model.pth", weights_only=False)
         else:
-            checkpoint = torch.load("./model/best_localize_model.pth", map_location=torch.device('cpu'))
+            checkpoint = torch.load("./model/best_localize_model.pth", map_location=torch.device('cpu'), weights_only=False)
         
         TD_model.load_state_dict(checkpoint['model_state_dict'])
        

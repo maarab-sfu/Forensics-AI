@@ -125,7 +125,10 @@ def bin2dec(b, bits=8):
     return torch.sum(mask * b, -1)
 
 def load(net, optim, name):
-    state_dicts = torch.load(name)
+    if torch.cuda.is_available():
+        state_dicts = torch.load(name)
+    else:
+        state_dicts = torch.load(name, map_location=torch.device('cpu'))
     network_state_dict = {k:v for k,v in state_dicts['net'].items() if 'tmp_var' not in k}
     net.load_state_dict(network_state_dict)
     try:

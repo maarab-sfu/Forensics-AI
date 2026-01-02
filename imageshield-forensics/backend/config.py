@@ -114,7 +114,7 @@ infoDict = {'JPEGQ':80 ,'resize_ratio': 0.5, 'pixel_ratio': 0.1 ,'cropout_ratio'
 # noises = ['Compression','GaussianBlur', 'MedianFilter','GaussianNoise','DropOut'] # Distortions for modified470 and 1230
 # attacks = ['Splicing', 'CopyMove', 'Inpainting', 'ObjectAddition'] # Tampering
 
-attacks = ['Splicing']
+attacks = ['Inpainting']
 noises = ['GaussianNoise']
 
 

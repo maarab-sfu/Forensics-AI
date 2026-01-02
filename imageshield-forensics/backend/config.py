@@ -67,6 +67,7 @@ Upsample_mode = 'nearest'
 # lamda_guide = 1
 # lamda_low_frequency = 1
 device_ids = [0]
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 BW = True # One channel secret images will be used.
 YCC = False # Using YCbCr instead of RGB. Two channel secret images will be used.
 ND1 = False # New design for the embedding of Secret Image and the code blocks. The secret channel has 1 channel.

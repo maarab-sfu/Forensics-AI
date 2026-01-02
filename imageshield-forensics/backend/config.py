@@ -1,3 +1,4 @@
+import torch
 # Super parameters
 clamp = 2.0
 channels_in = 3

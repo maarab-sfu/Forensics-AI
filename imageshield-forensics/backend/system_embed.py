@@ -165,35 +165,7 @@ def load_all_models():
     load(net, optim, c.MODEL_PATH + c.suffix)
     net.eval()
 
-    ####
-
-    """ Restoration Module """
-    generator = GeneratorRRDB(3, filters=64, num_res_blocks=23).to(device)
-    if torch.cuda.is_available():
-        generator.load_state_dict(torch.load('./saved_models/generator_2.pth'))
-    else:
-        generator.load_state_dict(torch.load('./saved_models/generator_2.pth', map_location=torch.device('cpu')))
-    generator.eval()
-
-    ####
-
-    TD_model = TamperingLocalizationNet2()
-    TD_model = TD_model.to(device)
-
-    if os.path.exists("./model/best_localize_model.pth"):
-        if torch.cuda.is_available():
-            checkpoint = torch.load("./model/best_localize_model.pth", weights_only=False)
-        else:
-            checkpoint = torch.load("./model/best_localize_model.pth", map_location=torch.device('cpu'), weights_only=False)
-        
-        TD_model.load_state_dict(checkpoint['model_state_dict'])
-       
-        print(f"Tampering Localization Model is loaded.")
-    
-    TD_model.eval()
-
-
-    return net, generator, TD_model
+    return net
 
 def embed_single_image(pil_cover):
     """
@@ -205,7 +177,7 @@ def embed_single_image(pil_cover):
     Returns:
         PIL.Image: Protected (stego) image.
     """
-    net, _, _ = load_all_models()
+    net = load_all_models()
     # --- Preprocessing ---
     transform = T.Compose([
         T.Lambda(val_resize),

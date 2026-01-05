@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from PIL import Image
 import torch
+import numpy as np
 
 # --------------------------------------------------
 # Import your wrappers

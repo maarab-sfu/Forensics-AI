@@ -781,8 +781,10 @@ def main():
 
                 # secret_rev_01 = (secret_rev - secret_rev.min()) / (secret_rev.max() - secret_rev.min() + 1e-8)
                 secret_rev_01 = torch.clamp(secret_rev, 0 , 1)
-                secret_rev_normalized = (secret_rev_01 - torch.tensor(mean).view(1, -1, 1, 1).to(secret_rev.device)) / \
-                                        torch.tensor(std).view(1, -1, 1, 1).to(secret_rev.device)
+                mean_t = torch.tensor(mean, dtype=torch.float32, device=secret_rev.device).view(1, -1, 1, 1)
+                std_t  = torch.tensor(std, dtype=torch.float32, device=secret_rev.device).view(1, -1, 1, 1)
+
+                secret_rev_normalized = (secret_rev_01.float() - mean_t) / std_t
 
                 """Restoration"""
                 imgs_lr1, imgs_lr2, imgs_lr3, imgs_lr4 = disect_secrev(secret_rev_normalized.float())

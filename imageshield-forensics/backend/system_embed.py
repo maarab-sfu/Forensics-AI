@@ -221,6 +221,8 @@ def embed_single_image(pil_cover):
         secret = torch.mean(secret, dim=1, keepdim=True)
 
     # --- Transform to frequency domain ---
+    dwt = common.DWT()
+    iwt = common.IWT()
     cover_input = dwt(cover)
     secret_input = dwt(secret)
 

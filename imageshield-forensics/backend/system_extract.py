@@ -328,6 +328,8 @@ def extract_single_image(pil_input):
 
     # ---- Extract thumbnail via inverse INN ----
     with torch.no_grad():
+        dwt = common.DWT()
+        iwt = common.IWT()
         output_steg = dwt(noised)
 
         # Fixed latent noise (deterministic)

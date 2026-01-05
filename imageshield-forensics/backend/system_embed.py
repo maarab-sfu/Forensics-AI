@@ -154,6 +154,57 @@ def hex_to_binary_string(hex_string):
     
     return bits
 
+def embed_single_image(pil_cover):
+    """
+    Embed a protection watermark into a single image (no authentication).
+
+    Args:
+        pil_cover (PIL.Image): Input RGB image.
+
+    Returns:
+        PIL.Image: Protected (stego) image.
+    """
+
+    # --- Preprocessing ---
+    transform = T.Compose([
+        T.Lambda(val_resize),
+        T.ToTensor(),
+    ])
+
+    cover = transform(pil_cover).unsqueeze(0).to(device)
+
+    # Use self-embedding (secret = cover)
+    secret = cover.clone()
+
+    if c.BW:
+        secret = torch.mean(secret, dim=1, keepdim=True)
+
+    # --- Transform to frequency domain ---
+    cover_input = dwt(cover)
+    secret_input = dwt(secret)
+
+    # Concatenate cover and secret
+    input_img = torch.cat((cover_input, secret_input), dim=1)
+
+    # --- Thumbnail embedding ---
+    with torch.no_grad():
+        output = net(input_img)
+
+        if c.TF == 'DCT':
+            output_steg = output.narrow(1, 0, c.channels_in)
+        else:
+            output_steg = output.narrow(1, 0, 4 * c.channels_in)
+
+        steg = iwt(output_steg)
+        steg = torch.clamp(steg, 0.0, 1.0)
+
+    # --- Convert to PIL ---
+    pil_steg = to_pil_image(steg[0]).convert("RGB")
+
+    return pil_steg
+
+
+
 def main():
     loss_fn_alex = lpips.LPIPS(net='alex')
 

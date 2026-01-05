@@ -262,7 +262,49 @@ def ycbcr_to_rgb(ycbcr_tensor):
 def val_resize(image):
     return resize(image, (c.cropsize_val, c.cropsize_val))
 
+def load_all_models():
+    net = Model()
+    net.to(device)
+    init_model(net)
+    net = torch.nn.DataParallel(net, device_ids=c.device_ids)
+    params_trainable_net = list(filter(lambda p: p.requires_grad, net.parameters()))
+    all_trainable_params = params_trainable_net
+    optim = torch.optim.Adam(all_trainable_params, lr=c.lr, betas=c.betas, eps=1e-6, weight_decay=c.weight_decay)
+    load(net, optim, c.MODEL_PATH + c.suffix)
+    net.eval()
+
+    ####
+
+    """ Restoration Module """
+    generator = GeneratorRRDB(3, filters=64, num_res_blocks=23).to(device)
+    if torch.cuda.is_available():
+        generator.load_state_dict(torch.load('./saved_models/generator_2.pth'))
+    else:
+        generator.load_state_dict(torch.load('./saved_models/generator_2.pth', map_location=torch.device('cpu')))
+    generator.eval()
+
+    ####
+
+    TD_model = TamperingLocalizationNet2()
+    TD_model = TD_model.to(device)
+
+    if os.path.exists("./model/best_localize_model.pth"):
+        if torch.cuda.is_available():
+            checkpoint = torch.load("./model/best_localize_model.pth", weights_only=False)
+        else:
+            checkpoint = torch.load("./model/best_localize_model.pth", map_location=torch.device('cpu'), weights_only=False)
+        
+        TD_model.load_state_dict(checkpoint['model_state_dict'])
+       
+        print(f"Tampering Localization Model is loaded.")
+    
+    TD_model.eval()
+
+
+    return net, generator, TD_model
+
 def extract_single_image(pil_input):
+
     """
     Perform tampering detection, localization, and restoration on a single image.
 
@@ -273,6 +315,8 @@ def extract_single_image(pil_input):
         restored_pil (PIL.Image): Restored image.
         mask_pil (PIL.Image): Binary tampering localization mask.
     """
+
+    net, generator, TD_model = load_all_models()
 
     transform = T.Compose([
         T.Lambda(val_resize),

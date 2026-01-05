@@ -106,9 +106,10 @@ async def extract_image(file: UploadFile = File(...)):
     mask_img.save(mask_path)
 
     # Simple authentication decision
-    mask_tensor = torch.from_numpy(
-        (torch.tensor(mask_img).float().mean(dim=-1) > 10).numpy()
-    )
+    mask_np = np.array(mask_img)
+    mask_bin = (torch.from_numpy(mask_np).float().mean(dim=-1) > 10).numpy()
+
+    mask_tensor = torch.from_numpy(mask_bin)
     tampered = bool(mask_tensor.sum() > 100)
 
     return {

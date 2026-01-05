@@ -28,6 +28,7 @@ from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 import torchvision.transforms as transforms
 from itertools import chain
 import lpips
+from torchvision.transforms.functional import resize
 
 import metrics
 if c.WM_MODEL == "InvisMark":

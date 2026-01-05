@@ -324,7 +324,7 @@ def extract_single_image(pil_input):
     ])
 
     # ---- Prepare input ----
-    noised = transform(pil_input).unsqueeze(0).to(device)
+    noised = transform(pil_input).unsqueeze(0).to(device).float()
 
     # ---- Extract thumbnail via inverse INN ----
     with torch.no_grad():
@@ -354,9 +354,10 @@ def extract_single_image(pil_input):
         secret_rev = torch.clamp(secret_rev, 0.0, 1.0)
 
         # Normalize for generator
-        secret_norm = (secret_rev -
-                       torch.tensor(mean).view(1, -1, 1, 1).to(device)) / \
-                      torch.tensor(std).view(1, -1, 1, 1).to(device)
+        mean_t = torch.tensor(mean, device=device, dtype=torch.float32).view(1, -1, 1, 1)
+        std_t  = torch.tensor(std,  device=device, dtype=torch.float32).view(1, -1, 1, 1)
+
+        secret_norm = (secret_rev - mean_t) / std_t
 
         # ---- Restoration ----
         imgs_lr1, imgs_lr2, imgs_lr3, imgs_lr4 = disect_secrev(secret_norm)
@@ -781,10 +782,8 @@ def main():
 
                 # secret_rev_01 = (secret_rev - secret_rev.min()) / (secret_rev.max() - secret_rev.min() + 1e-8)
                 secret_rev_01 = torch.clamp(secret_rev, 0 , 1)
-                mean_t = torch.tensor(mean, dtype=torch.float32, device=secret_rev.device).view(1, -1, 1, 1)
-                std_t  = torch.tensor(std, dtype=torch.float32, device=secret_rev.device).view(1, -1, 1, 1)
-
-                secret_rev_normalized = (secret_rev_01.float() - mean_t) / std_t
+                secret_rev_normalized = (secret_rev_01 - torch.tensor(mean).view(1, -1, 1, 1).to(secret_rev.device)) / \
+                                        torch.tensor(std).view(1, -1, 1, 1).to(secret_rev.device)
 
                 """Restoration"""
                 imgs_lr1, imgs_lr2, imgs_lr3, imgs_lr4 = disect_secrev(secret_rev_normalized.float())

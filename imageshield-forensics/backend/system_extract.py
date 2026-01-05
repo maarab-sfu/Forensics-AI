@@ -262,6 +262,89 @@ def ycbcr_to_rgb(ycbcr_tensor):
 def val_resize(image):
     return resize(image, (c.cropsize_val, c.cropsize_val))
 
+def extract_single_image(pil_input):
+    """
+    Perform tampering detection, localization, and restoration on a single image.
+
+    Args:
+        pil_input (PIL.Image): Protected or tampered image.
+
+    Returns:
+        restored_pil (PIL.Image): Restored image.
+        mask_pil (PIL.Image): Binary tampering localization mask.
+    """
+
+    transform = T.Compose([
+        T.Lambda(val_resize),
+        T.ToTensor(),
+    ])
+
+    # ---- Prepare input ----
+    noised = transform(pil_input).unsqueeze(0).to(device)
+
+    # ---- Extract thumbnail via inverse INN ----
+    with torch.no_grad():
+        output_steg = dwt(noised)
+
+        # Fixed latent noise (deterministic)
+        output_z_backward = torch.zeros(
+            (1, 24, c.cropsize_val // 2, c.cropsize_val // 2),
+            device=device
+        )
+
+        output_rev = torch.cat((output_steg, output_z_backward), dim=1)
+        output_image = net(output_rev, rev=True)
+
+        if c.TF == 'DCT':
+            secret_rev = output_image.narrow(1, c.channels_in, c.channels_in)
+        else:
+            secret_rev = output_image.narrow(
+                1,
+                4 * c.channels_in,
+                output_image.shape[1] - 4 * c.channels_in
+            )
+
+        secret_rev = iwt(secret_rev)
+        secret_rev = torch.clamp(secret_rev, 0.0, 1.0)
+
+        # Normalize for generator
+        secret_norm = (secret_rev -
+                       torch.tensor(mean).view(1, -1, 1, 1).to(device)) / \
+                      torch.tensor(std).view(1, -1, 1, 1).to(device)
+
+        # ---- Restoration ----
+        imgs_lr1, imgs_lr2, imgs_lr3, imgs_lr4 = disect_secrev(secret_norm)
+        restored = denormalize(generator(imgs_lr1, imgs_lr2, imgs_lr3, imgs_lr4))
+
+        # ---- Tampering localization ----
+        extracted_mask = TD_model(noised, restored)
+
+        if extracted_mask.shape[1] == 1:
+            extracted_mask = extracted_mask.repeat(1, 3, 1, 1)
+
+        extracted_mask = torch.sigmoid(extracted_mask)
+        extracted_mask_bin = (extracted_mask > 0.5).float()
+
+        # ---- Final composition ----
+        extracted_mask_resized = F.interpolate(
+            extracted_mask_bin,
+            size=(c.cropsize_val, c.cropsize_val),
+            mode="bilinear",
+            align_corners=False
+        )
+
+        final_restored = torch.where(
+            extracted_mask_resized < 1e-6,
+            noised,
+            restored
+        )
+
+    # ---- Convert outputs to PIL ----
+    restored_pil = to_pil_image(final_restored[0].cpu()).convert("RGB")
+    mask_pil = to_pil_image(extracted_mask_resized[0].cpu()).convert("RGB")
+
+    return restored_pil, mask_pil
+
 def main():
     to_pil = T.ToPILImage()
     loss_fn_alex = lpips.LPIPS(net='alex')

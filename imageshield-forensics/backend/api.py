@@ -3,6 +3,7 @@ import uuid
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from PIL import Image
 import torch
 import numpy as np
@@ -29,6 +30,8 @@ for d in [PROTECTED_DIR, RESTORED_DIR, MASK_DIR]:
 # App initialization
 # --------------------------------------------------
 app = FastAPI(title="ImageShield Demo API")
+
+app.mount("/outputs", StaticFiles(directory=OUTPUT_DIR), name="outputs")
 
 # --------------------------------------------------
 # CORS (GitHub Pages + local testing)
@@ -85,7 +88,8 @@ async def embed_image(file: UploadFile = File(...)):
     protected_img.save(out_path)
 
     return {
-        "protected": f"/outputs/protected/{uid}"
+        "success": True,
+        "protected_image": f"/outputs/protected/{uid}"
     }
 
 
@@ -97,7 +101,7 @@ async def extract_image(file: UploadFile = File(...)):
     try:
         restored_img, mask_img = extract_single_image(pil_img)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Extraction failed: {e}")
+        raise HTTPException(status_code=400, detail=f"Extraction failed: {str(e)}")
 
     uid = uuid.uuid4().hex
     restored_path = os.path.join(RESTORED_DIR, f"{uid}.png")
@@ -108,21 +112,17 @@ async def extract_image(file: UploadFile = File(...)):
 
     # Simple authentication decision
     mask_np = np.array(mask_img)
-    mask_bin = (torch.from_numpy(mask_np).float().mean(dim=-1) > 10).numpy()
+    mask_tensor = torch.from_numpy(mask_np).to(torch.float32)
+    mask_bin = (mask_tensor.mean(dim=-1) > 10)
 
     mask_tensor = torch.from_numpy(mask_bin)
     tampered = bool(mask_tensor.sum() > 100)
 
     return {
-        "restored": f"/outputs/restored/{uid}.png",
-        "mask": f"/outputs/masks/{uid}.png",
-        "auth": "tampered" if tampered else "authentic"
+        "success": True,
+        "restored_image": f"/outputs/restored/{uid}.png",
+        "localization_mask": f"/outputs/masks/{uid}.png",
+        "authentication": "tampered" if tampered else "authentic"
     }
 
 
-@app.get("/outputs/{subdir}/{filename}")
-async def get_output(subdir: str, filename: str):
-    path = os.path.join(OUTPUT_DIR, subdir, filename)
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(path)

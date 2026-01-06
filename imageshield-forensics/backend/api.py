@@ -115,7 +115,6 @@ async def extract_image(file: UploadFile = File(...)):
     mask_tensor = torch.from_numpy(mask_np).to(torch.float32)
     mask_bin = (mask_tensor.mean(dim=-1) > 10)
 
-    mask_tensor = torch.from_numpy(mask_bin)
     tampered = bool(mask_tensor.sum() > 100)
 
     return {

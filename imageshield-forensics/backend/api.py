@@ -4,6 +4,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import torch
 import numpy as np
@@ -32,6 +33,14 @@ for d in [PROTECTED_DIR, RESTORED_DIR, MASK_DIR]:
 app = FastAPI(title="ImageShield Demo API")
 
 app.mount("/outputs", StaticFiles(directory=OUTPUT_DIR), name="outputs")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # OK for demo
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --------------------------------------------------
 # CORS (GitHub Pages + local testing)
